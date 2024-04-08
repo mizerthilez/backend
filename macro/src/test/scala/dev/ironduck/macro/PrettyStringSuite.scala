@@ -53,7 +53,7 @@ class PrettyStringSuite extends munit.FunSuite:
       AnonymousVisitor,
     )
 
-  test("PrettyString should function well"):
+  test("PrettyString should work"):
     val prettyStrings = someVisitors.map:
       PrettyString[Visitor].prettyString
 
