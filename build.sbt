@@ -11,6 +11,7 @@ lazy val root =
 lazy val backend =
   project
     .in(file("backend"))
+    .dependsOn(`macro` % MyUtil.Cctt)
     .settings(name := "backend")
     .settings(commonSettings)
     .settings(autoImportSettings)
