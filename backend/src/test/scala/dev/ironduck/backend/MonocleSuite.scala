@@ -3,6 +3,8 @@ package dev.ironduck.backend
 import java.time.YearMonth
 import dev.ironduck.`macro`.PrettyString
 import monocle.Traversal
+import monocle.Focus
+import com.eed3si9n.expecty.Expecty.expect
 
 case class User(name: String, debitCards: Vector[DebitCard])
 case class DebitCard(cardNumber: String, expirationDate: YearMonth, securityCode: Int)
@@ -11,6 +13,7 @@ case class Lecturer(firstName: String, lastName: String, salary: Int)
 case class Department(budget: Int, lecturers: List[Lecturer])
 case class University(name: String, departments: Map[String, Department])
 
+@nowarn
 class MonocleSuite extends munit.FunSuite:
   lazy val anna = User(
     "Anna",
@@ -22,13 +25,14 @@ class MonocleSuite extends munit.FunSuite:
 
   lazy val bob = User("Bob", Vector())
 
-  test("index should work"):
+  test("user - index should work"):
     import monocle.syntax.all.*
 
     val anna_new = anna
       .focus(_.debitCards.index(0).expirationDate)
       .replace(YearMonth.of(2026, 3))
 
+    println(PrettyString.dotted("user - index should work"))
     PrettyString.prettyPrintln(anna_new)
     assertEquals(anna_new.debitCards(0).expirationDate, YearMonth.of(2026, 3))
 
@@ -38,6 +42,20 @@ class MonocleSuite extends munit.FunSuite:
 
     PrettyString.prettyPrintln(bob_new)
     assertEquals(bob_new, bob)
+
+  test("user - lens should be composable"):
+    val nameLen = Focus[User](_.name)
+    val expireDateLen = Focus[User](_.debitCards).each.andThen(Focus[DebitCard](_.expirationDate))
+    val comp = nameLen.replace("John") compose expireDateLen.modify(_.plusMonths(1))
+    val john = comp(anna)
+
+    println(PrettyString.dotted("user - lens should be composable"))
+    PrettyString.prettyPrintln(john)
+    expect(
+      john.name == "John",
+      john.debitCards(0).expirationDate == YearMonth.of(2022, 5),
+      john.debitCards(1).expirationDate == YearMonth.of(2024, 9),
+    )
 
   lazy val uni = University(
     "oxford",
@@ -59,11 +77,12 @@ class MonocleSuite extends munit.FunSuite:
   )
   end uni
 
-  import monocle.Focus
   lazy val departments = Focus[University](_.departments)
 
   test("university - remove a department"):
     val uni_new = departments.at("History").replace(None)(uni)
+
+    println(PrettyString.dotted("university - remove a department"))
     PrettyString.prettyPrintln(uni_new)
     assertEquals(uni_new.departments.get("History"), None)
 
@@ -78,6 +97,8 @@ class MonocleSuite extends munit.FunSuite:
     end physics
 
     val uni_new = departments.at("Physics").replace(Some(physics))(uni)
+
+    println(PrettyString.dotted("university - add a department"))
     PrettyString.prettyPrintln(uni_new)
     assertEquals(uni_new.departments.get("Physics"), Some(physics))
 
@@ -86,6 +107,8 @@ class MonocleSuite extends munit.FunSuite:
     import com.eed3si9n.expecty.Expecty.expect
 
     val uni_new = uni.focus(_.departments.each.lecturers.each.salary).modify(_ + 2)
+
+    println(PrettyString.dotted("university - all lectures get a salary increase"))
     PrettyString.prettyPrintln(uni_new)
     expect(
       uni_new.departments("Computer Science").lecturers(0).salary == 12,
@@ -103,9 +126,12 @@ class MonocleSuite extends munit.FunSuite:
 
   test("university - all lectures's first names and last names get uppered"):
     import monocle.syntax.all.*
-    import com.eed3si9n.expecty.Expecty.expect
 
     val uni_new = all.andThen(names).index(0).modify(_.toUpper)(uni)
+
+    println(
+      PrettyString.dotted("university - all lectures's first names and last names get uppered")
+    )
     PrettyString.prettyPrintln(uni_new)
     expect(
       uni_new.departments("Computer Science").lecturers(0).firstName == "John",
