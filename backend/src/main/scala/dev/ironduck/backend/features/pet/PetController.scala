@@ -2,22 +2,16 @@ package dev.ironduck.backend
 package features.pet
 
 import cats.effect.IO
-import cats.implicits.*
-import org.http4s.HttpRoutes
 import sttp.model.StatusCode
 import sttp.tapir.*
-import sttp.tapir.json.circe.jsonBody
-import sttp.tapir.server.http4s.Http4sServerInterpreter
 import sttp.tapir.generic.auto.*
+import sttp.tapir.json.circe.jsonBody
+import sttp.tapir.server.ServerEndpoint
 
 import dto.PetDto
 import shared.BackendException
 
 object PetController:
-  def endpoints: List[AnyEndpoint] = List(petContestEndpoint)
-
-  def routes: HttpRoutes[IO] = petContestRoutes
-
   private val petContestEndpoint = endpoint // The endpoint and it is used to generate the OpenAPI
     .summary("Pet Contest")
     .post
@@ -29,7 +23,7 @@ object PetController:
         .and(jsonBody[BackendException])
     )
 
-  private val petContestRoutes = // convert the endpoint to actual http4s route
-    Http4sServerInterpreter[IO]().toRoutes(
-      petContestEndpoint.serverLogicRecoverErrors(PetService.petContest(_))
-    )
+  val petContestServerEndpoint =
+    petContestEndpoint.serverLogicRecoverErrors(PetService.petContest(_))
+
+  val endpoints: List[ServerEndpoint[Any, IO]] = List(petContestServerEndpoint)

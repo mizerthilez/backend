@@ -11,6 +11,9 @@ object Dependencies {
 
     object softwaremill {
       object sttp {
+        object client3 {
+          val circe = "com.softwaremill.sttp.client3" %% "circe" % "3.9.5"
+        }
         object tapir {
           // Tapir
           // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-http4s-server
@@ -21,6 +24,9 @@ object Dependencies {
 
           // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-swagger-ui-bundle
           val `tapir-swagger-ui-bundle` = moduleId("swagger-ui-bundle")
+
+          // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-sttp-stub-server
+          val `tapir-sttp-stub-server` = moduleId("sttp-stub-server")
 
           private def moduleId(artifact: String): ModuleID =
             "com.softwaremill.sttp.tapir" %% s"tapir-$artifact" % "1.10.0"

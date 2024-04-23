@@ -2,21 +2,16 @@ package dev.ironduck.backend
 package features.guest
 
 import cats.effect.IO
-import cats.implicits.*
-import org.http4s.HttpRoutes
 import sttp.model.StatusCode
 import sttp.tapir.*
-import sttp.tapir.json.circe.*
-import sttp.tapir.server.http4s.Http4sServerInterpreter
 import sttp.tapir.generic.auto.*
+import sttp.tapir.json.circe.jsonBody
+import sttp.tapir.server.ServerEndpoint
 
 import dto.GuestDto
 import shared.BackendException
 
 object GuestController:
-  def endpoints: List[AnyEndpoint] = List(letEnterAdultGuestEpt, listGuestsEpt)
-  def routes: HttpRoutes[IO] = letEnterAdultGuestRts <+> listGuestsRts
-
   private val letEnterAdultGuestEpt = endpoint
     .summary("Let enter adult guest")
     .post
@@ -27,12 +22,11 @@ object GuestController:
       statusCode(StatusCode.BadRequest)
         .and(jsonBody[BackendException]) // This endpoint can throw errors + ✨ Auto Derivation Magic applied!
     )
-  private val letEnterAdultGuestRts = Http4sServerInterpreter[IO]().toRoutes(
-    letEnterAdultGuestEpt
-      .serverLogicRecoverErrors( // == recover from "BadRequestException" exceptions raised + Encode as JSON and return them
-        dto => GuestService.letEnterAdultGuest(dto)
-      )
-  )
+
+  val letEnterAdultGuestServerEndpoint =
+    letEnterAdultGuestEpt.serverLogicRecoverErrors( // == recover from "BadRequestException" exceptions raised + Encode as JSON and return them
+      dto => GuestService.letEnterAdultGuest(dto)
+    )
 
   private val listGuestsEpt = endpoint
     .summary("List guests")
@@ -45,7 +39,9 @@ object GuestController:
         ]
       ]
     )
-  private val listGuestsRts =
-    Http4sServerInterpreter[IO]().toRoutes(
-      listGuestsEpt.serverLogicSuccess(_ => GuestService.listGuests())
-    )
+
+  val listGuestsServerEndpoint =
+    listGuestsEpt.serverLogicSuccess(_ => GuestService.listGuests())
+
+  val endpoints: List[ServerEndpoint[Any, IO]] =
+    List(letEnterAdultGuestServerEndpoint, listGuestsServerEndpoint)

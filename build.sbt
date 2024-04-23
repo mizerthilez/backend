@@ -17,7 +17,7 @@ lazy val backend =
     .settings(autoImportSettings)
     .settings(libraryDependencies ++= dep_backend)
     .settings(libraryDependencies ++= dep_munit_test)
-    .settings(Compile / run / fork := true)
+// .settings(Compile / run / fork := true)
 
 lazy val `macro` =
   project
@@ -76,6 +76,7 @@ val dep_backend = Seq(
   com.softwaremill.sttp.tapir.`tapir-http4s-server`,
   com.softwaremill.sttp.tapir.`tapir-json-circe`,
   com.softwaremill.sttp.tapir.`tapir-swagger-ui-bundle`,
+  com.softwaremill.sttp.tapir.`tapir-sttp-stub-server`,
   // Http4s
   org.http4s.`http4s-ember-server`,
   org.http4s.`http4s-circe`,
@@ -93,4 +94,5 @@ val dep_munit_test = Seq(
   org.scalameta.`munit-scalacheck`,
   org.scalameta.munit,
   org.typelevel.`discipline-munit`,
+  com.softwaremill.sttp.client3.circe,
 ).map(_ % Test)
