@@ -10,7 +10,7 @@ import features.guest.GuestController
 import features.pet.PetController
 
 object BackendServerConf:
-  private val apiEndPoints =
+  val apiEndPoints =
     TextController.endpoints ++ GuestController.endpoints ++ PetController.endpoints
 
   private val docsEndpoint = // Merge all endpoints as a fully usable OpenAPI doc
