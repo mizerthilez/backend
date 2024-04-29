@@ -88,6 +88,23 @@ class BackendSuite extends munit.FunSuite:
       case _ =>
         fail("wrong exception")
 
+  test("pet contest - empty list throws exception"):
+    // given
+    import features.pet.dto.PetDto
+    val pets: Vector[PetDto] = Vector.empty
+
+    // when
+    import io.circe.syntax.*
+    val response = basicRequest
+      .body(pets.asJson)
+      .post(uri"http://test.com/pets/contest")
+      .response(asJson[PetDto].getRight) // getRight will throw exception when code is not 2xx
+      .send(backendStub)
+
+    // then
+    intercept[sttp.client3.SttpClientException.ReadException]:
+      response.map(_.body).unwrap
+
   test("guests - under 18"):
     // given
     import features.guest.dto.GuestDto
