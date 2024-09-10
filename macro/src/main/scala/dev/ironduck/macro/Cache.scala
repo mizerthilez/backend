@@ -23,7 +23,8 @@ class cached extends MacroAnnotation:
   override def transform(
     using quotes: Quotes
   )(
-    tree: quotes.reflect.Definition
+    tree: quotes.reflect.Definition,
+    companion: Option[quotes.reflect.Definition],
   ): List[quotes.reflect.Definition] =
     import quotes.reflect.*
 

@@ -1,7 +1,7 @@
 import Dependencies.{ io, _ }
 
 ThisBuild / organization := "dev.ironduck"
-ThisBuild / scalaVersion := "3.4.0"
+ThisBuild / scalaVersion := "3.5.0"
 
 lazy val root =
   project

@@ -72,13 +72,13 @@ trait EasyDerive[TC[_]]:
               )
 
         val fromElements: List[Any] => A = elements =>
-          val product: Product = new Product:
-            override def productArity: Int = caseClassElements.size
-
-            override def productElement(n: Int): Any = elements(n)
-
-            override def canEqual(that: Any): Boolean = false
-
-          p.fromProduct(product)
+          p.fromProduct(new FromProduct(caseClassElements.size, elements))
 
         deriveCaseClass(CaseClassType[A](label, caseClassElements, fromElements))
+
+  final class FromProduct(size: Int, elements: List[Any]) extends Product:
+    override def productArity: Int = size
+
+    override def productElement(n: Int): Any = elements(n)
+
+    override def canEqual(that: Any): Boolean = false
